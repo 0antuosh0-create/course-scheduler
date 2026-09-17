@@ -49,24 +49,6 @@
 
 * { box-sizing: border-box; }
 
-[hidden] { display: none !important; }
-
-.visually-hidden {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.drop:focus-within, .searchbox:focus-within {
-  outline: 3px solid var(--blue);
-  outline-offset: 4px;
-}
-
 html { scroll-behavior: smooth; }
 
 body {
@@ -1029,6 +1011,9 @@ mark {
   display: grid; place-items: center;
   padding: 24px;
   overflow-y: auto;
+}
+.modal-backdrop[hidden] {
+  display: none !important;
 }
 .modal {
   width: min(860px, 100%);

@@ -188,7 +188,7 @@
 
     <div class="upload-grid">
       <label class="drop" id="drop212" data-kind="212">
-        <input type="file" accept="application/pdf,.pdf" class="visually-hidden">
+        <input type="file" accept="application/pdf,.pdf" hidden>
         <div class="drop-top">
           <span class="drop-num num-coral">۲۱۲</span>
           <div class="drop-title">
@@ -205,7 +205,7 @@
       </label>
 
       <label class="drop" id="drop102" data-kind="102">
-        <input type="file" accept=".xlsx,.xls" class="visually-hidden">
+        <input type="file" accept=".xlsx,.xls" hidden>
         <div class="drop-top">
           <span class="drop-num num-blue">۱۰۲</span>
           <div class="drop-title">
@@ -222,7 +222,7 @@
       </label>
 
       <label class="drop" id="drop110" data-kind="110">
-        <input type="file" accept=".xlsx,.xls" class="visually-hidden">
+        <input type="file" accept=".xlsx,.xls" hidden>
         <div class="drop-top">
           <span class="drop-num num-emerald">۱۱۰</span>
           <div class="drop-title">
@@ -260,7 +260,7 @@
       <div class="toolbar">
         <div class="searchbox">
           <svg viewBox="0 0 24 24" class="ic"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input id="search" type="search" aria-label="جست‌وجوی درس، استاد یا کد" placeholder="جست‌وجوی درس، استاد یا کد…" autocomplete="off">
+          <input id="search" type="search" placeholder="جست‌وجوی درس، استاد یا کد…" autocomplete="off">
         </div>
         <span class="chip chip-credits" id="creditChip" title="مجموع واحدهای انتخاب‌شده">۰ واحد</span>
         <span class="chip chip-conflict" id="conflictChip" title="تعداد تداخل‌ها">۰ تداخل</span>
@@ -268,13 +268,13 @@
     </div>
 
     <!-- Mobile View Switcher -->
-    <div class="mobile-view-tabs" id="mobileViewTabs" role="group" aria-label="نمای برنامه‌ریز">
-      <button type="button" class="m-tab is-active" data-tab="courses" aria-pressed="true">
+    <div class="mobile-view-tabs" id="mobileViewTabs" role="tablist">
+      <button type="button" class="m-tab is-active" data-tab="courses">
         <svg viewBox="0 0 24 24" class="ic"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15Z"/></svg>
         فهرست دروس
         <span class="m-tab-badge" id="mCoursesBadge">۰</span>
       </button>
-      <button type="button" class="m-tab" data-tab="calendar" aria-pressed="false">
+      <button type="button" class="m-tab" data-tab="calendar">
         <svg viewBox="0 0 24 24" class="ic"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/></svg>
         تقویم هفتگی
         <span class="m-tab-badge" id="mPickedBadge">۰</span>
@@ -289,9 +289,9 @@
             <span class="count-badge" id="listCount">۰ درس</span>
           </div>
           <div class="seg" role="group" aria-label="فیلتر وضعیت">
-            <button class="seg-btn is-active" data-filter="all" type="button" aria-pressed="true">همه</button>
-            <button class="seg-btn" data-filter="picked" type="button" aria-pressed="false">انتخاب‌شده</button>
-            <button class="seg-btn" data-filter="free" type="button" aria-pressed="false">بدون تداخل</button>
+            <button class="seg-btn is-active" data-filter="all" type="button">همه</button>
+            <button class="seg-btn" data-filter="picked" type="button">انتخاب‌شده</button>
+            <button class="seg-btn" data-filter="free" type="button">بدون تداخل</button>
           </div>
         </div>
         <div class="course-list" id="courseList"></div>
@@ -335,7 +335,7 @@
 <div class="toast-wrap" id="toasts" aria-live="polite"></div>
 
 <div class="modal-backdrop" id="detailsBackdrop" hidden>
-  <div class="modal" id="detailsModal" role="dialog" aria-modal="true" aria-labelledby="detailsTitle"></div>
+  <div class="modal" id="detailsModal" role="dialog" aria-modal="true"></div>
 </div>
 
 <script src="vendor/xlsx.full.min.js"></script>

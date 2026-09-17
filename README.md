@@ -19,7 +19,7 @@ clean sheet you can print, save as PDF, or share as an image.
 
 - **Drag-and-drop upload** of the three reports (PDF + 2 Excel files)
 - **Merge engine** — joins course metadata across reports, tolerates missing fields
-- **Weekly calendar** — Saturday–Friday grid, 7:00–20:00, side-by-side conflict blocks
+- **Weekly calendar** — Saturday–Thursday grid, 7:00–20:00, side-by-side conflict blocks
 - **Collision detection** — duplicate codes, lecture overlaps (critical), exam-hour overlaps, same-day exam warnings
 - **Export** — self-contained printable sheet (A4 landscape; longer selections may span pages) and 2× PNG snapshot
 - **100% offline** — works from `index.html` opened directly, no server, no telemetry
