@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f8f5ee">
+<meta name="description" content="بندرِ ترم — سامانهٔ برنامه‌ریزی هفتگی دروس دانشگاه: ادغام گزارش‌های ۲۱۲، ۱۰۲ و ۱۱۰، تقویم تعاملی، هشدار تداخل و خروجی برنامهٔ هفتگی">
+<title>بندرِ ترم | برنامه‌ریز هفتگی دروس دانشگاه</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#" title="بندرِ ترم — سامانهٔ انتخاب واحد دانشگاه">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" class="brand-grid-ic">
+          <rect x="2.5" y="2.5" width="8" height="8" rx="2" fill="#fbbf24" stroke="#0f1f33" stroke-width="1.6"/>
+          <rect x="13.5" y="2.5" width="8" height="8" rx="2" fill="#38bdf8" stroke="#0f1f33" stroke-width="1.6"/>
+          <rect x="2.5" y="13.5" width="8" height="8" rx="2" fill="#fa5238" stroke="#0f1f33" stroke-width="1.6"/>
+          <rect x="13.5" y="13.5" width="8" height="8" rx="2" fill="#10b981" stroke="#0f1f33" stroke-width="1.6"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-main">
+          <strong>بندرِ ترم</strong>
+          <span class="brand-tag">TERM HARBOR</span>
+        </span>
+        <span class="brand-sub"><i class="sub-dot"></i> سامانهٔ جامع انتخاب واحد</span>
+      </span>
+    </a>
+
+    <nav class="topnav" aria-label="ناوبری اصلی">
+      <a href="#upload" class="navpill is-active">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M12 3v12m0-12 4 4m-4-4-4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        گزارش‌ها
+      </a>
+      <a href="#planner" class="navpill">
+        <svg viewBox="0 0 24 24" class="ic"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/></svg>
+        برنامهٔ هفتگی
+        <span class="nav-count-badge" id="navCreditsBadge" hidden>۰ واحد</span>
+      </a>
+      <a href="#conflicts" class="navpill">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        تداخل‌ها
+        <span class="nav-alert-bubble" id="navConflictBubble" hidden>۰</span>
+      </a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button id="btnExport" class="btn btn-primary btn-topbar" type="button" disabled title="خروجی و چاپ برنامه هفتگی">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M12 15V3m0 12-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <span class="btn-text">خروجی برنامه</span>
+      </button>
+      <button id="btnReset" class="btn btn-ghost btn-topbar btn-reset" type="button" disabled title="پاکسازی و شروع دوباره">
+        <svg viewBox="0 0 24 24" class="ic ic-spin"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0-5v5h5"/></svg>
+        <span class="btn-text">شروع دوباره</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ================= HERO ================= -->
+  <section class="hero" id="top">
+    <div class="hero-copy">
+      <span class="pill pill-hero">
+        <svg viewBox="0 0 24 24" class="ic ic-coral"><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9l2.1 2.1m10 10 2.1 2.1m0-14.2-2.1 2.1m-10 10-2.1 2.1"/></svg>
+        سامانهٔ انتخاب واحد ترم ۱۴۰۵-۱۴۰۶
+      </span>
+      <h1>برنامهٔ هفتگی‌ات را <mark>خودت بچین</mark>، بدون تداخل</h1>
+      <p class="hero-lead">
+        نه دفترچهٔ کاغذی، نه اکسل‌های پراکنده — گزارش‌های ۲۱۲، ۱۰۲ و ۱۱۰ را بارگذاری کن؛
+        بندرِ ترم فقط درس‌های مجاز تو را برمی‌دارد، با استاد، ساعت، کلاس و زمان امتحان غنی می‌کند
+        و روی تقویم هفتگی می‌چیند. تداخل کلاس و امتحان همان لحظه هشدار داده می‌شود.
+      </p>
+      <div class="hero-cta">
+        <a href="#upload" class="btn btn-primary btn-lg">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M5 12h14m-6-7 7 7-7 7" class="flip"/></svg>
+          بارگذاری گزارش‌ها
+        </a>
+      </div>
+      <ul class="hero-stats">
+        <li><svg viewBox="0 0 24 24" class="ic ic-blue"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15Z"/></svg><span id="statCourses">۰</span> درس مجاز</li>
+        <li><svg viewBox="0 0 24 24" class="ic ic-emerald"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/></svg><span id="statSelected">۰</span> درس انتخابی</li>
+        <li><svg viewBox="0 0 24 24" class="ic ic-amber"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span id="statCredits">۰</span> واحد</li>
+        <li><svg viewBox="0 0 24 24" class="ic ic-coral"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span id="statConflicts">۰</span> تداخل</li>
+      </ul>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+      <div class="art-card">
+        <div class="art-head">
+          <div class="art-dots">
+            <span class="art-dot dot-red"></span>
+            <span class="art-dot dot-yellow"></span>
+            <span class="art-dot dot-green"></span>
+          </div>
+          <span class="art-title">برنامهٔ هفتگی نمونه</span>
+          <span class="art-term-pill">ترم اول ۱۴۰۵</span>
+        </div>
+
+        <div class="art-days-row">
+          <span>شنبه</span>
+          <span>یک‌شنبه</span>
+          <span>دوشنبه</span>
+          <span>سه‌شنبه</span>
+          <span>چهارشنبه</span>
+        </div>
+
+        <div class="art-schedule-body">
+          <!-- Saturday -->
+          <div class="art-day-col">
+            <div class="mini-blk blk-blue" style="top: 10px; height: 50px;">
+              <strong>ریاضی عمومی ۱</strong>
+              <small>۰۸:۰۰ - ۱۰:۰۰</small>
+            </div>
+            <div class="mini-blk blk-emerald" style="top: 72px; height: 50px;">
+              <strong>فیزیک ۱</strong>
+              <small>۱۰:۳۰ - ۱۲:۳۰</small>
+            </div>
+          </div>
+
+          <!-- Sunday -->
+          <div class="art-day-col">
+            <div class="mini-blk blk-violet" style="top: 32px; height: 50px;">
+              <strong>مبانی کامپیوتر</strong>
+              <small>۰۹:۰۰ - ۱۱:۰۰</small>
+            </div>
+            <div class="mini-blk blk-amber" style="top: 130px; height: 44px;">
+              <strong>زبان عمومی</strong>
+              <small>۱۳:۳۰ - ۱۵:۰۰</small>
+            </div>
+          </div>
+
+          <!-- Monday -->
+          <div class="art-day-col">
+            <div class="mini-blk blk-blue" style="top: 10px; height: 50px;">
+              <strong>ریاضی عمومی ۱</strong>
+              <small>۰۸:۰۰ - ۱۰:۰۰</small>
+            </div>
+            <div class="mini-blk blk-rose" style="top: 120px; height: 48px;">
+              <strong>کارگاه عمومی</strong>
+              <small>۱۳:۰۰ - ۱۵:۰۰</small>
+            </div>
+          </div>
+
+          <!-- Tuesday -->
+          <div class="art-day-col">
+            <div class="mini-blk blk-emerald" style="top: 72px; height: 50px;">
+              <strong>فیزیک ۱</strong>
+              <small>۱۰:۳۰ - ۱۲:۳۰</small>
+            </div>
+            <div class="mini-blk blk-teal" style="top: 138px; height: 44px;">
+              <strong>آز فیزیک</strong>
+              <small>۱۴:۰۰ - ۱۶:۰۰</small>
+            </div>
+          </div>
+
+          <!-- Wednesday -->
+          <div class="art-day-col">
+            <div class="mini-blk blk-violet" style="top: 32px; height: 50px;">
+              <strong>مبانی کامپیوتر</strong>
+              <small>۰۹:۰۰ - ۱۱:۰۰</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <span class="art-floating-badge badge-credits">
+        <svg viewBox="0 0 24 24" class="ic"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        ۲۰ واحد چیده‌شده
+      </span>
+      <span class="art-floating-badge badge-perfect">
+        <svg viewBox="0 0 24 24" class="ic ic-emerald"><path d="M20 6 9 17l-5-5"/></svg>
+        هماهنگی ۱۰۰٪ بدون تداخل
+      </span>
+    </div>
+  </section>
+
+  <!-- ================= UPLOAD ================= -->
+  <section class="section" id="upload">
+    <div class="section-head">
+      <span class="pill">گام ۱</span>
+      <h2>سه گزارش، یک برنامه</h2>
+      <p>گزارش ۲۱۲ درس‌های مجاز تو را می‌دهد؛ ۱۰۲ استاد، ساعت و امتحان را؛ ۱۱۰ کلاس و نکات تکمیلی را. ادغام با کلید «شماره و گروه درس» انجام می‌شود.</p>
+    </div>
+
+    <div class="upload-grid">
+      <label class="drop" id="drop212" data-kind="212">
+        <input type="file" accept="application/pdf,.pdf" class="visually-hidden">
+        <div class="drop-top">
+          <span class="drop-num num-coral">۲۱۲</span>
+          <div class="drop-title">
+            <strong>گزارش ۲۱۲</strong>
+            <span class="pill-format format-pdf">PDF</span>
+          </div>
+          <span class="drop-status-dot" data-status-dot title="وضعیت فایل"></span>
+        </div>
+        <p class="drop-desc">دروس ارائه‌شدهٔ مجاز برای دانشجو در این نیم‌سال</p>
+        <div class="drop-chip" data-state>
+          <svg viewBox="0 0 24 24" class="ic"><path d="M12 15V3m0 12-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          <span class="drop-chip-text">انتخاب یا رها کردن فایل PDF</span>
+        </div>
+      </label>
+
+      <label class="drop" id="drop102" data-kind="102">
+        <input type="file" accept=".xlsx,.xls" class="visually-hidden">
+        <div class="drop-top">
+          <span class="drop-num num-blue">۱۰۲</span>
+          <div class="drop-title">
+            <strong>گزارش ۱۰۲</strong>
+            <span class="pill-format format-xlsx">Excel</span>
+          </div>
+          <span class="drop-status-dot" data-status-dot title="وضعیت فایل"></span>
+        </div>
+        <p class="drop-desc">کاتالوگ کامل: اساتید، ساعات ارائه و امتحانات</p>
+        <div class="drop-chip" data-state>
+          <svg viewBox="0 0 24 24" class="ic"><path d="M12 15V3m0 12-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          <span class="drop-chip-text">انتخاب یا رها کردن فایل اکسل</span>
+        </div>
+      </label>
+
+      <label class="drop" id="drop110" data-kind="110">
+        <input type="file" accept=".xlsx,.xls" class="visually-hidden">
+        <div class="drop-top">
+          <span class="drop-num num-emerald">۱۱۰</span>
+          <div class="drop-title">
+            <strong>گزارش ۱۱۰</strong>
+            <span class="pill-format format-xlsx">Excel</span>
+          </div>
+          <span class="drop-status-dot" data-status-dot title="وضعیت فایل"></span>
+        </div>
+        <p class="drop-desc">دادهٔ تکمیلی: مکان/کلاس، حذف اضطراری و ضوابط</p>
+        <div class="drop-chip" data-state>
+          <svg viewBox="0 0 24 24" class="ic"><path d="M12 15V3m0 12-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          <span class="drop-chip-text">انتخاب یا رها کردن فایل اکسل</span>
+        </div>
+      </label>
+    </div>
+
+    <div class="merge-bar" id="mergeBar" hidden>
+      <div class="merge-info">
+        <svg viewBox="0 0 24 24" class="ic ic-emerald"><path d="M20 6 9 17l-5-5"/></svg>
+        <span id="mergeText"></span>
+      </div>
+      <a href="#planner" class="btn btn-primary">رفتن به برنامه‌ریز
+        <svg viewBox="0 0 24 24" class="ic"><path d="M5 12h14m-6-7 7 7-7 7" class="flip"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ================= PLANNER ================= -->
+  <section class="section" id="planner" hidden>
+    <div class="section-head row">
+      <div>
+        <span class="pill">گام ۲</span>
+        <h2>برنامه‌ریز هفتگی</h2>
+      </div>
+      <div class="toolbar">
+        <div class="searchbox">
+          <svg viewBox="0 0 24 24" class="ic"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="search" type="search" aria-label="جست‌وجوی درس، استاد یا کد" placeholder="جست‌وجوی درس، استاد یا کد…" autocomplete="off">
+        </div>
+        <span class="chip chip-credits" id="creditChip" title="مجموع واحدهای انتخاب‌شده">۰ واحد</span>
+        <span class="chip chip-conflict" id="conflictChip" title="تعداد تداخل‌ها">۰ تداخل</span>
+      </div>
+    </div>
+
+    <!-- Mobile View Switcher -->
+    <div class="mobile-view-tabs" id="mobileViewTabs" role="group" aria-label="نمای برنامه‌ریز">
+      <button type="button" class="m-tab is-active" data-tab="courses" aria-pressed="true">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15Z"/></svg>
+        فهرست دروس
+        <span class="m-tab-badge" id="mCoursesBadge">۰</span>
+      </button>
+      <button type="button" class="m-tab" data-tab="calendar" aria-pressed="false">
+        <svg viewBox="0 0 24 24" class="ic"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/></svg>
+        تقویم هفتگی
+        <span class="m-tab-badge" id="mPickedBadge">۰</span>
+      </button>
+    </div>
+
+    <div class="planner-grid">
+      <aside class="course-pane">
+        <div class="pane-head">
+          <div class="pane-head-top">
+            <h3>دروس مجاز</h3>
+            <span class="count-badge" id="listCount">۰ درس</span>
+          </div>
+          <div class="seg" role="group" aria-label="فیلتر وضعیت">
+            <button class="seg-btn is-active" data-filter="all" type="button" aria-pressed="true">همه</button>
+            <button class="seg-btn" data-filter="picked" type="button" aria-pressed="false">انتخاب‌شده</button>
+            <button class="seg-btn" data-filter="free" type="button" aria-pressed="false">بدون تداخل</button>
+          </div>
+        </div>
+        <div class="course-list" id="courseList"></div>
+      </aside>
+
+      <div class="cal-pane">
+        <div class="pane-head">
+          <h3>تقویم هفته</h3>
+          <span class="hint">با کلیک روی هر درس در تقویم، جزئیات کامل آن نمایش داده می‌شود</span>
+        </div>
+        <div class="cal-wrap">
+          <div class="cal" id="calendar"></div>
+        </div>
+        <div class="legend">
+          <span><i class="sw sw-blue"></i>کلاس نظری/عملی</span>
+          <span><i class="sw sw-amber"></i>امتحان</span>
+          <span><i class="sw sw-red"></i>تداخل زمانی</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONFLICTS ================= -->
+  <section class="section" id="conflicts" hidden>
+    <div class="section-head">
+      <span class="pill pill-coral">هشدارها</span>
+      <h2>تداخل‌های کلاس و امتحان</h2>
+      <p>هر تداخل با کلیک، درس‌های درگیر را در فهرست برجسته می‌کند.</p>
+    </div>
+    <div class="conflict-list" id="conflictList"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="brand-text"><strong>بندرِ ترم</strong><small>TERM HARBOR</small></span>
+    <p>ساخته‌شده برای دانشجویان؛ داده‌ها فقط روی مرورگر تو می‌مانند.</p>
+  </div>
+</footer>
+
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+
+<div class="modal-backdrop" id="detailsBackdrop" hidden>
+  <div class="modal" id="detailsModal" role="dialog" aria-modal="true" aria-labelledby="detailsTitle"></div>
+</div>
+
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="vendor/pdf.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
