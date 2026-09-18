@@ -22,6 +22,7 @@ clean sheet you can print, save as PDF, or share as an image.
 - **Weekly calendar** — Saturday–Thursday grid, 7:00–20:00, side-by-side conflict blocks
 - **Collision detection** — duplicate codes, lecture overlaps (critical), exam-hour overlaps, same-day exam warnings
 - **Export** — self-contained printable sheet (A4 landscape; longer selections may span pages) and 2× PNG snapshot
+- **Backup & Restore (JSON)** — export complete schedule data and selections into a JSON file, and restore back on any device
 - **100% offline** — works from `index.html` opened directly, no server, no telemetry
 - **Zero dependencies to install** — pdf.js, SheetJS, and the Vazirmatn font are bundled in `vendor/`
 

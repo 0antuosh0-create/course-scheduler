@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#f8f5ee">
 <meta name="description" content="بندرِ ترم — سامانهٔ برنامه‌ریزی هفتگی دروس دانشگاه: ادغام گزارش‌های ۲۱۲، ۱۰۲ و ۱۱۰، تقویم تعاملی، هشدار تداخل و خروجی برنامهٔ هفتگی">
 <title>بندرِ ترم | برنامه‌ریز هفتگی دروس دانشگاه</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=1.0.2">
 </head>
 <body>
 
@@ -239,6 +239,24 @@
       </label>
     </div>
 
+    <div class="backup-bar" id="backupBar">
+      <div class="backup-info">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <span>پشتیبان‌گیری و بازیابی فایل JSON (انتقال داده‌ها بین دستگاه‌ها):</span>
+      </div>
+      <div class="backup-actions">
+        <label class="btn btn-sm btn-ghost" id="lblImportBackup" title="بازیابی برنامه از فایل پشتیبان JSON">
+          <input type="file" id="inputImportBackup" accept="application/json,.json" hidden>
+          <svg viewBox="0 0 24 24" class="ic"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          بازیابی از پشتیبان (JSON)
+        </label>
+        <button type="button" class="btn btn-sm btn-ghost" id="btnExportBackup" disabled title="دانلود فایل پشتیبان داده‌ها و دروس انتخابی">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          خروجی پشتیبان (JSON)
+        </button>
+      </div>
+    </div>
+
     <div class="merge-bar" id="mergeBar" hidden>
       <div class="merge-info">
         <svg viewBox="0 0 24 24" class="ic ic-emerald"><path d="M20 6 9 17l-5-5"/></svg>
@@ -264,6 +282,10 @@
         </div>
         <span class="chip chip-credits" id="creditChip" title="مجموع واحدهای انتخاب‌شده">۰ واحد</span>
         <span class="chip chip-conflict" id="conflictChip" title="تعداد تداخل‌ها">۰ تداخل</span>
+        <button type="button" class="btn btn-sm btn-ghost btn-backup-planner" id="btnBackupPlanner" title="دانلود فایل پشتیبان JSON از برنامه کنونی">
+          <svg viewBox="0 0 24 24" class="ic"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          پشتیبان‌گیری (JSON)
+        </button>
       </div>
     </div>
 
@@ -338,6 +360,6 @@
 
 <script src="vendor/xlsx.full.min.js"></script>
 <script src="vendor/pdf.min.js"></script>
-<script src="app.js?v=1.0.1"></script>
+<script src="app.js?v=1.0.2"></script>
 </body>
 </html>

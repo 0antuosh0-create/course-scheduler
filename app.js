@@ -722,6 +722,103 @@
   }
 
   // ------------------------------------------------------------
+  // BACKUP & RESTORE (EXPORT / IMPORT JSON)
+  // ------------------------------------------------------------
+  function exportBackup() {
+    if (!state.mergedCourses || state.mergedCourses.length === 0) {
+      showToast("هیچ داده‌ای برای پشتیبان‌گیری وجود ندارد. ابتدا گزارش‌ها را بارگذاری کنید.", "is-warn");
+      return;
+    }
+    const backup = {
+      version: 1,
+      app: "termharbor",
+      exportedAt: new Date().toISOString(),
+      payload: {
+        selectedCodes: Array.from(state.selectedCodes),
+        mergedCourses: state.mergedCourses,
+        eligibleCodes: Array.from(state.eligibleCodes),
+        catalog102: Array.from(state.catalog102.entries()),
+        catalog110: Array.from(state.catalog110.entries()),
+        filesMeta: {
+          "212": state.files["212"] ? { name: state.files["212"].name, size: state.files["212"].size } : null,
+          "102": state.files["102"] ? { name: state.files["102"].name, size: state.files["102"].size } : null,
+          "110": state.files["110"] ? { name: state.files["110"].name, size: state.files["110"].size } : null,
+        },
+      },
+    };
+    const jsonStr = JSON.stringify(backup, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const dateStr = new Date().toISOString().slice(0, 10);
+    link.href = url;
+    link.download = `termharbor-backup-${dateStr}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    showToast("فایل پشتیبان JSON با موفقیت دانلود شد.", "is-ok");
+  }
+
+  function importBackup(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        const payload = data.payload || data;
+        if (!payload || !Array.isArray(payload.mergedCourses) || payload.mergedCourses.length === 0) {
+          throw new Error("فایل فاقد ساختار معتبر دروس است یا هیچ درسی در آن یافت نشد.");
+        }
+        state.mergedCourses = payload.mergedCourses;
+        state.selectedCodes = new Set(Array.isArray(payload.selectedCodes) ? payload.selectedCodes : []);
+        if (Array.isArray(payload.eligibleCodes)) {
+          state.eligibleCodes = new Set(payload.eligibleCodes);
+        } else {
+          state.eligibleCodes = new Set(state.mergedCourses.map((c) => c.code));
+        }
+        if (Array.isArray(payload.catalog102)) {
+          state.catalog102 = new Map(payload.catalog102);
+        }
+        if (Array.isArray(payload.catalog110)) {
+          state.catalog110 = new Map(payload.catalog110);
+        }
+        if (payload.filesMeta) {
+          Object.keys(payload.filesMeta).forEach((k) => {
+            if (payload.filesMeta[k]) {
+              state.files[k] = payload.filesMeta[k];
+              updateDropState(k, "is-ok", `بازیابی‌شده (${payload.filesMeta[k].name})`);
+            }
+          });
+        }
+
+        saveToStorage();
+
+        document.getElementById("planner").hidden = false;
+        document.getElementById("conflicts").hidden = false;
+        document.getElementById("mergeBar").hidden = false;
+        document.getElementById("mergeText").textContent = `پشتیبان بازیابی شد: ${toFa(state.mergedCourses.length)} درس مجاز (${toFa(state.selectedCodes.size)} انتخاب‌شده).`;
+        document.getElementById("btnExport").disabled = false;
+        document.getElementById("btnReset").disabled = false;
+        const btnExportBackup = document.getElementById("btnExportBackup");
+        if (btnExportBackup) btnExportBackup.disabled = false;
+        const btnBackupPlanner = document.getElementById("btnBackupPlanner");
+        if (btnBackupPlanner) btnBackupPlanner.disabled = false;
+
+        renderAll();
+        showToast(`پشتیبان با موفقیت بازیابی شد (${toFa(state.mergedCourses.length)} درس، ${toFa(state.selectedCodes.size)} انتخاب‌شده).`, "is-ok");
+      } catch (err) {
+        console.error("خطا در بازیابی پشتیبان:", err);
+        showToast(`خطا در بازیابی فایل پشتیبان: ${err.message}`, "is-warn");
+      }
+    };
+    reader.onerror = () => {
+      showToast("خطا در خواندن فایل از حافظه دستگاه.", "is-warn");
+    };
+    reader.readAsText(file);
+  }
+
+  // ------------------------------------------------------------
   // LOCAL STORAGE PERSISTENCE
   // ------------------------------------------------------------
   function saveToStorage() {
@@ -729,6 +826,9 @@
       const payload = {
         selectedCodes: Array.from(state.selectedCodes),
         mergedCourses: state.mergedCourses,
+        eligibleCodes: Array.from(state.eligibleCodes),
+        catalog102: Array.from(state.catalog102.entries()),
+        catalog110: Array.from(state.catalog110.entries()),
         filesMeta: {
           "212": state.files["212"] ? { name: state.files["212"].name, size: state.files["212"].size } : null,
           "102": state.files["102"] ? { name: state.files["102"].name, size: state.files["102"].size } : null,
@@ -751,6 +851,19 @@
       if (data && Array.isArray(data.mergedCourses) && data.mergedCourses.length > 0) {
         state.mergedCourses = data.mergedCourses;
         state.selectedCodes = new Set(data.selectedCodes || []);
+        if (Array.isArray(data.eligibleCodes)) {
+          state.eligibleCodes = new Set(data.eligibleCodes);
+        }
+        if (Array.isArray(data.catalog102)) {
+          state.catalog102 = new Map(data.catalog102);
+        }
+        if (Array.isArray(data.catalog110)) {
+          state.catalog110 = new Map(data.catalog110);
+        }
+        const btnExportBackup = document.getElementById("btnExportBackup");
+        if (btnExportBackup) btnExportBackup.disabled = false;
+        const btnBackupPlanner = document.getElementById("btnBackupPlanner");
+        if (btnBackupPlanner) btnBackupPlanner.disabled = false;
         if (data.filesMeta) {
           Object.keys(data.filesMeta).forEach((k) => {
             if (data.filesMeta[k]) {
@@ -783,6 +896,12 @@
     document.getElementById("conflicts").hidden = true;
     document.getElementById("btnExport").disabled = true;
     document.getElementById("btnReset").disabled = true;
+    const btnExportBackup = document.getElementById("btnExportBackup");
+    if (btnExportBackup) btnExportBackup.disabled = true;
+    const btnBackupPlanner = document.getElementById("btnBackupPlanner");
+    if (btnBackupPlanner) btnBackupPlanner.disabled = true;
+    const inputImport = document.getElementById("inputImportBackup");
+    if (inputImport) inputImport.value = "";
     updateStats();
     showToast("اطلاعات برنامه بازنشانی شد.", "is-warn");
   }
@@ -1778,6 +1897,10 @@ table.tbl { width:100%; border-collapse:separate; border-spacing:0; border:2px s
             document.getElementById("conflicts").hidden = false;
             document.getElementById("btnExport").disabled = false;
             document.getElementById("btnReset").disabled = false;
+            const btnExportBackup = document.getElementById("btnExportBackup");
+            if (btnExportBackup) btnExportBackup.disabled = false;
+            const btnBackupPlanner = document.getElementById("btnBackupPlanner");
+            if (btnBackupPlanner) btnBackupPlanner.disabled = false;
           }
         } catch (err) {
           console.error(err);
@@ -1888,6 +2011,19 @@ table.tbl { width:100%; border-collapse:separate; border-spacing:0; border:2px s
         resetStorage();
       }
     });
+    // Backup & Restore buttons
+    document.getElementById("btnExportBackup")?.addEventListener("click", exportBackup);
+    document.getElementById("btnBackupPlanner")?.addEventListener("click", exportBackup);
+    const inputImportBackup = document.getElementById("inputImportBackup");
+    if (inputImportBackup) {
+      inputImportBackup.addEventListener("change", () => {
+        if (inputImportBackup.files && inputImportBackup.files[0]) {
+          importBackup(inputImportBackup.files[0]);
+          inputImportBackup.value = "";
+        }
+      });
+    }
+
     // Modal backdrop click & button actions
     const backdrop = document.getElementById("detailsBackdrop");
     if (backdrop) {
@@ -1953,6 +2089,8 @@ table.tbl { width:100%; border-collapse:separate; border-spacing:0; border:2px s
     renderAll,
     openCourseDetails,
     closeCourseDetails,
+    exportBackup,
+    importBackup,
   };
 
   if (document.readyState === "loading") {

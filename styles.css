@@ -602,6 +602,36 @@ mark {
 }
 .merge-info { display: flex; align-items: center; gap: 10px; font-weight: 700; }
 
+.backup-bar {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  background: var(--card);
+  border: 1.6px dashed rgba(15, 31, 51, 0.28);
+  border-radius: var(--r-card);
+  padding: 12px 20px;
+}
+.backup-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.backup-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn-backup-planner {
+  margin-inline-start: auto;
+}
+
 /* ---------------- planner ---------------- */
 .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .searchbox {
@@ -1274,6 +1304,21 @@ mark {
   .merge-bar .btn {
     width: 100%;
   }
+  .backup-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+  .backup-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .backup-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
 
   /* Planner section on mobile */
   .section-head.row {
