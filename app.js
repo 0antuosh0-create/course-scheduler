@@ -440,14 +440,14 @@
   // Sample: "درس(ت): شنبه 13:00-15:00  درس(ت): دوشنبه 13:00-15:00"
   function parseSessions(str, defaultRoom = null) {
     if (!str) return [];
-    const en = toEnDigits(str);
+    const en = toEnDigits(String(str)).replace(/[\u200c\u00a0]/g, " ");
     const sessions = [];
 
-    // Match patterns like: درس(ت): شنبه 13:00-15:00 or درس(ع): چهارشنبه 08:00-11:00
-    const regex = /درس\s*\((.*?)\)\s*:\s*([^\d:]+?)\s+(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/g;
+    // Match patterns like: درس(ت): شنبه 13:00-15:00, شنبه 13:00 تا 15:00, درس(ع): چهارشنبه 08:00–11:00
+    const regex = /(?:درس\s*\((.*?)\)\s*:\s*)?([^\d:]+?)\s+(\d{1,2}:\d{2})\s*(?:[-–—]|تا|الی)\s*(\d{1,2}:\d{2})/g;
     let m;
     while ((m = regex.exec(en)) !== null) {
-      const typeStr = m[1].trim(); // ت (theory), ع (practical)
+      const typeStr = (m[1] || "ت").trim(); // ت (theory), ع (practical)
       const dayRaw = m[2].trim();
       const dayKey = normalizeDayName(dayRaw);
       const start = m[3].trim();
@@ -474,16 +474,25 @@
   // Sample: "تاریخ: 1405/11/12 ساعت: 08:00-10:00" or "امتحان(1405.11.14) ساعت : 11:00-13:00"
   function parseExam(str) {
     if (!str) return null;
-    const en = toEnDigits(str);
+    const en = toEnDigits(String(str)).replace(/[\u200c\u00a0]/g, " ");
 
-    // Look for date pattern 140x/xx/xx or 140x.xx.xx
-    const dateMatch = en.match(/(14\d{2}[/.]\d{1,2}[/.]\d{1,2})/);
-    // Look for hour range xx:xx-xx:xx
-    const timeMatch = en.match(/ساعت\s*:?\s*(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+    // 1. Flexible Date matching: supports 140x/xx/xx, 140x.xx.xx, 140x-xx-xx with single or double digits
+    const dateMatch = en.match(/(\d{2,4})[./\-](\d{1,2})[./\-](\d{1,2})/);
+
+    // 2. Flexible Time matching: supports "08:00-10:00", "08:00–10:00", "08:00 تا 10:00", "ساعت: 08:00 - 10:00"
+    const timeMatch = en.match(/(\d{1,2}:\d{2})\s*(?:[-–—]|تا|الی)\s*(\d{1,2}:\d{2})/);
 
     if (!dateMatch && !timeMatch) return null;
 
-    const normalizedDate = dateMatch ? dateMatch[1].replace(/\./g, "/") : null;
+    let normalizedDate = null;
+    if (dateMatch) {
+      let y = dateMatch[1];
+      if (y.length === 2) y = "14" + y;
+      const m = dateMatch[2].padStart(2, "0");
+      const d = dateMatch[3].padStart(2, "0");
+      normalizedDate = `${y}/${m}/${d}`;
+    }
+
     const startTime = timeMatch ? timeMatch[1] : null;
     const endTime = timeMatch ? timeMatch[2] : null;
 
@@ -495,6 +504,21 @@
       endMin: endTime ? timeToMinutes(endTime) : null,
       raw: str,
     };
+  }
+
+  // Reliable exam getter with on-the-fly fallback to rawExam and rawCombined
+  function getCourseExam(course) {
+    if (!course) return null;
+    if (course.exam && course.exam.date) return course.exam;
+    if (course.rawExam) {
+      const parsed = parseExam(course.rawExam);
+      if (parsed && parsed.date) return parsed;
+    }
+    if (course.rawCombined) {
+      const parsed = parseExam(course.rawCombined);
+      if (parsed && parsed.date) return parsed;
+    }
+    return course.exam || null;
   }
 
   // Sample: "مکان: 308" or "مکان: کلاس شماره 106"
@@ -574,15 +598,14 @@
   // ------------------------------------------------------------
   function normalizeExamDate(dStr) {
     if (!dStr) return null;
-    const clean = toEnDigits(dStr).replace(/[.\-]/g, "/").trim();
-    const parts = clean.split("/").filter(Boolean);
-    if (parts.length === 3) {
-      const y = parts[0];
-      const m = parts[1].padStart(2, "0");
-      const d = parts[2].padStart(2, "0");
-      return `${y}/${m}/${d}`;
-    }
-    return clean;
+    const en = toEnDigits(String(dStr));
+    const m = en.match(/(\d{2,4})[./\-](\d{1,2})[./\-](\d{1,2})/);
+    if (!m) return null;
+    let y = m[1];
+    if (y.length === 2) y = "14" + y;
+    const month = m[2].padStart(2, "0");
+    const day = m[3].padStart(2, "0");
+    return `${y}/${month}/${day}`;
   }
 
   // ------------------------------------------------------------
@@ -630,9 +653,9 @@
         const c2 = selectedCourseList[j];
 
         // A) Lecture overlaps
-        for (const s1 of c1.sessions) {
-          for (const s2 of c2.sessions) {
-            if (s1.dayKey === s2.dayKey && s1.startMin !== null && s2.startMin !== null) {
+        for (const s1 of c1.sessions || []) {
+          for (const s2 of c2.sessions || []) {
+            if (s1.dayKey === s2.dayKey && s1.startMin !== null && s2.startMin !== null && s1.endMin !== null && s2.endMin !== null) {
               const overlapStart = Math.max(s1.startMin, s2.startMin);
               const overlapEnd = Math.min(s1.endMin, s2.endMin);
 
@@ -656,8 +679,8 @@
         }
 
         // B) Exam conflicts (Direct Hour Collision vs Same-Day Collision)
-        const exam1 = c1.exam;
-        const exam2 = c2.exam;
+        const exam1 = getCourseExam(c1);
+        const exam2 = getCourseExam(c2);
 
         if (exam1 && exam2 && exam1.date && exam2.date) {
           const d1 = normalizeExamDate(exam1.date);
@@ -667,7 +690,7 @@
             let isHourOverlap = false;
             let overlapWindow = null;
 
-            if (exam1.startMin !== null && exam2.startMin !== null) {
+            if (exam1.startMin !== null && exam2.startMin !== null && exam1.endMin !== null && exam2.endMin !== null) {
               const oStart = Math.max(exam1.startMin, exam2.startMin);
               const oEnd = Math.min(exam1.endMin, exam2.endMin);
               if (oStart < oEnd) {
@@ -689,16 +712,16 @@
               });
             } else {
               // Warning: two exams on the same day at different hours
-              const t1 = exam1.startTime ? `${exam1.startTime} تا ${exam1.endTime || ""}` : "ساعت نامشخص";
-              const t2 = exam2.startTime ? `${exam2.startTime} تا ${exam2.endTime || ""}` : "ساعت نامشخص";
+              const t1 = exam1.startTime ? `${toFa(exam1.startTime)} تا ${toFa(exam1.endTime || "")}` : "ساعت نامشخص";
+              const t2 = exam2.startTime ? `${toFa(exam2.startTime)} تا ${toFa(exam2.endTime || "")}` : "ساعت نامشخص";
               examConflicts.push({
                 type: "exam",
                 severity: "warning",
                 course1: c1,
                 course2: c2,
                 date: d1,
-                title: `دو امتحان در یک روز: «${c1.name}» و «${c2.name}»`,
-                desc: `هر دو آزمون در تاریخ ${toFa(d1)} برگزار می‌شوند (ساعت آزمون اول: ${toFa(t1)} • ساعت آزمون دوم: ${toFa(t2)}).`,
+                title: `دو امتحان در یک روز (هشدار): «${c1.name}» و «${c2.name}»`,
+                desc: `هر دو آزمون در تاریخ ${toFa(d1)} برگزار می‌شوند (ساعت آزمون اول: ${t1} • ساعت آزمون دوم: ${t2}).`,
               });
             }
           }
@@ -1029,17 +1052,34 @@
     const selected = state.mergedCourses.filter((c) => state.selectedCodes.has(c.code));
     const conflicts = detectCollisions(selected);
 
-    // Identify which course codes have collisions
+    // Identify which course codes have collisions and track specific reasons
     const conflictingCodes = new Set();
+    const conflictReasons = new Map();
+
+    const addConflictReason = (code, reason) => {
+      if (!conflictReasons.has(code)) conflictReasons.set(code, new Set());
+      conflictReasons.get(code).add(reason);
+    };
+
+    conflicts.duplicateConflicts.forEach((c) => {
+      conflictingCodes.add(c.course1.code);
+      conflictingCodes.add(c.course2.code);
+      addConflictReason(c.course1.code, "کد تکراری");
+      addConflictReason(c.course2.code, "کد تکراری");
+    });
     conflicts.lectureConflicts.forEach((c) => {
       conflictingCodes.add(c.course1.code);
       conflictingCodes.add(c.course2.code);
+      addConflictReason(c.course1.code, "تداخل کلاس");
+      addConflictReason(c.course2.code, "تداخل کلاس");
     });
     conflicts.examConflicts.forEach((c) => {
       conflictingCodes.add(c.course1.code);
       conflictingCodes.add(c.course2.code);
+      const label = c.severity === "critical" ? "تداخل ساعت امتحان" : "دو امتحان در یک روز";
+      addConflictReason(c.course1.code, label);
+      addConflictReason(c.course2.code, label);
     });
-
     let list = state.mergedCourses.filter((c) => {
       if (!query) return true;
       const haystack = normalizePersianText(
@@ -1079,8 +1119,9 @@
       .map((c) => {
         const isPicked = state.selectedCodes.has(c.code);
         const hasConflict = isPicked && conflictingCodes.has(c.code);
+        const examInfo = getCourseExam(c);
 
-        const sessionsHtml = c.sessions.length
+        const sessionsHtml = c.sessions && c.sessions.length
           ? c.sessions
               .map(
                 (s) =>
@@ -1089,8 +1130,13 @@
               .join("")
           : "<span>زمان ارائه نامشخص</span>";
 
-        const examHtml = c.exam && c.exam.date
-          ? `<span class="tag tag-exam"><svg viewBox="0 0 24 24" class="ic"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/></svg>امتحان: ${toFa(c.exam.date)}${c.exam.startTime ? ` (${toFa(c.exam.startTime)})` : ""}</span>`
+        const examHtml = examInfo && examInfo.date
+          ? `<span class="tag tag-exam" title="آزمون پایانی: ${toFa(examInfo.date)}${examInfo.startTime ? ` ساعت ${toFa(examInfo.startTime)} تا ${toFa(examInfo.endTime || "")}` : ""}"><svg viewBox="0 0 24 24" class="ic"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/></svg>امتحان: ${toFa(examInfo.date)}${examInfo.startTime ? ` (${toFa(examInfo.startTime)}–${toFa(examInfo.endTime || "")})` : ""}</span>`
+          : "";
+
+        const reasons = isPicked && conflictReasons.has(c.code) ? Array.from(conflictReasons.get(c.code)) : [];
+        const conflictBadge = reasons.length > 0
+          ? `<span class="tag tag-conflict-alert" title="${reasons.join(" • ")}"><svg viewBox="0 0 24 24" class="ic"><path d="m10.29 3.86-8.6 14.9A2 2 0 0 0 3.4 21.76h17.2a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4m0 4h.01"/></svg>${reasons.join(" • ")}</span>`
           : "";
 
         const roomHtml = c.room
@@ -1120,6 +1166,7 @@
               <span class="tag tag-prof">${c.professor}</span>
               ${roomHtml}
               ${examHtml}
+              ${conflictBadge}
               ${c.capacity ? `<span class="tag">ظرفیت: ${toFa(c.capacity)}</span>` : ""}
             </div>
 
@@ -1328,11 +1375,27 @@
     const remainingSeats = capacity ? Math.max(0, capacity - enrolled) : null;
     const capacityPercent = capacity > 0 ? Math.min(100, Math.round((enrolled / capacity) * 100)) : 0;
 
+    const examInfo = getCourseExam(course);
+    const selected = state.mergedCourses.filter((c) => state.selectedCodes.has(c.code));
+    const conflicts = detectCollisions(selected);
+
+    // Check if this course has an exam conflict with any currently picked course
+    const activeExamConflict = isPicked
+      ? conflicts.examConflicts.find((ec) => ec.course1.code === course.code || ec.course2.code === course.code)
+      : null;
+
+    const examDuration = (examInfo && examInfo.startMin != null && examInfo.endMin != null)
+      ? `${toFa(Math.round(((examInfo.endMin - examInfo.startMin) / 60) * 10) / 10)} ساعت (${toFa(examInfo.endMin - examInfo.startMin)} دقیقه)`
+      : null;
+
     // Header badges
     const headerBadges = [
       `<span class="pill">کد درس: ${toFa(course.courseCode)}</span>`,
       `<span class="pill">گروه: ${toFa(course.group)}</span>`,
       `<span class="pill pill-coral">استاد: ${course.professor}</span>`,
+      examInfo && examInfo.date
+        ? `<span class="pill pill-amber" style="background:#fef3c7; color:#92400e; border:1px solid #f59e0b; font-weight:800;">آزمون: ${toFa(examInfo.date)}${examInfo.startTime ? ` (${toFa(examInfo.startTime)} تا ${toFa(examInfo.endTime || "")})` : ""}</span>`
+        : `<span class="pill">فاقد امتحان کتبی</span>`,
       course.faculty && isNaN(Number(course.faculty)) ? `<span class="pill">${course.faculty}</span>` : "",
       course.dept && isNaN(Number(course.dept)) ? `<span class="pill">${course.dept}</span>` : "",
     ].filter(Boolean).join("");
@@ -1365,22 +1428,36 @@
       `;
 
     // Exam HTML
-    const examHtml = course.exam && course.exam.date
+    const examHtml = examInfo && examInfo.date
       ? `
         <div class="detail-rows">
           <div class="detail-row">
             <span>تاریخ آزمون پایانی:</span>
-            <b>${toFa(course.exam.date)} (تقویم شمسی)</b>
+            <b style="color:var(--ink);">${toFa(examInfo.date)} (تقویم شمسی)</b>
           </div>
           <div class="detail-row">
             <span>ساعت برگزاری آزمون:</span>
-            <b>${course.exam.startTime ? `${toFa(course.exam.startTime)} تا ${toFa(course.exam.endTime || "")}` : "ساعت نامشخص"}</b>
+            <b style="color:var(--ink);">${examInfo.startTime ? `${toFa(examInfo.startTime)} تا ${toFa(examInfo.endTime || "")}` : "ساعت نامشخص"}</b>
           </div>
+          ${examDuration ? `
+          <div class="detail-row">
+            <span>مدت زمان آزمون:</span>
+            <b>${examDuration}</b>
+          </div>` : ""}
           <div class="detail-row">
             <span>محل آزمون:</span>
             <b>${course.room ? toFa(course.room) : "محل برگزاری متعاقباً اعلام می‌شود"}</b>
           </div>
         </div>
+        ${activeExamConflict ? `
+          <div class="exam-conflict-notice" style="margin-top:14px; padding:12px 14px; border-radius:10px; font-size:0.84rem; font-weight:700; display:flex; align-items:flex-start; gap:10px; background:${activeExamConflict.severity === "critical" ? "rgba(250,82,56,0.12)" : "rgba(245,158,11,0.14)"}; color:${activeExamConflict.severity === "critical" ? "#b42318" : "#92400e"}; border:1.6px solid ${activeExamConflict.severity === "critical" ? "rgba(225,29,72,0.45)" : "rgba(245,158,11,0.5)"};">
+            <svg viewBox="0 0 24 24" class="ic" style="flex:none; width:1.3rem; height:1.3rem; margin-top:2px;"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+            <div>
+              <div style="font-weight:900; margin-bottom:2px;">${activeExamConflict.title}</div>
+              <div style="font-size:0.8rem; font-weight:600; opacity:0.95;">${activeExamConflict.desc}</div>
+            </div>
+          </div>
+        ` : ""}
       `
       : `
         <div class="exam-notice-box">
@@ -1810,8 +1887,7 @@ table.tbl { width:100%; border-collapse:separate; border-spacing:0; border:2px s
 
     <footer class="sheet-footer">
       <div class="legend">
-        <span><i style="background:#1d63ed"></i>کلاس هفتگی</span>
-        <span><i style="background:#fa5238"></i>تداخل زمانی</span>
+        <span><i style="background:#1d63ed"></i>خدا پشت و پناهتون</span>
       </div>
       <span>ساخته‌شده با بندرِ ترم</span>
     </footer>

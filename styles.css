@@ -104,6 +104,8 @@ mark {
 .pill-hero { box-shadow: 3px 3px 0 var(--ink); padding: 6px 18px; }
 .pill-coral { background: var(--coral-soft); border-color: var(--coral-line); color: #b42318; box-shadow: 2px 2px 0 var(--coral-line); }
 
+.pill-amber { background: var(--amber-soft); border-color: var(--amber-line); color: #92400e; box-shadow: 2px 2px 0 var(--amber-line); font-weight: 800; }
+
 .chip {
   display: inline-flex; align-items: center; gap: 6px;
   border-radius: var(--r-pill);
@@ -754,6 +756,14 @@ mark {
 .tag-room { background: var(--blue-soft); border-color: var(--blue-line); color: #1e40af; }
 .tag-exam { background: var(--amber-soft); border-color: var(--amber-line); color: #92400e; }
 .tag-warn { background: var(--coral-soft); border-color: var(--coral-line); color: #b42318; }
+.tag-conflict-alert {
+  background: rgba(250, 82, 56, 0.14) !important;
+  border-color: rgba(225, 29, 72, 0.45) !important;
+  color: #b42318 !important;
+  font-weight: 800 !important;
+  box-shadow: 1.5px 1.5px 0 rgba(225, 29, 72, 0.25);
+}
+
 
 .course-sessions { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; color: var(--ink-2); font-weight: 600; }
 .course-sessions b { color: var(--ink); font-weight: 800; }
